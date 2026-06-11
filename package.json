@@ -1,0 +1,14 @@
+{
+  "name": "cs2-veto",
+  "version": "1.0.0",
+  "description": "CS2 Map Veto — пик/бан карт для двух игроков с авторизацией",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.11"
+  },
+  "license": "MIT"
+}
