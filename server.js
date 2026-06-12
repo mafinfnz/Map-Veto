@@ -26,7 +26,11 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 // ---------------------------------------------------------------- Конфиг
 let fileConfig = {};
 try { fileConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')); } catch (e) {}
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || fileConfig.googleClientId || '';
+function normalizeGoogleClientId(v) {
+  return String(v || '').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+}
+const GOOGLE_CLIENT_ID = normalizeGoogleClientId(process.env.GOOGLE_CLIENT_ID || fileConfig.googleClientId || '');
+const AVATAR_COUNT = 5;
 
 // ---------------------------------------------------------------- Карты CS2
 const MAP_POOL = [
@@ -235,12 +239,15 @@ async function api(req, res, url) {
 
   // --- регистрация (организатор)
   if (p === '/api/register' && req.method === 'POST') {
-    const { username, password } = await readBody(req);
+    const { username, password, avatar } = await readBody(req);
     if (!username || !password || username.length < 2 || password.length < 4)
       return json(res, 400, { error: 'Логин от 2 символов, пароль от 4' });
     if (db.users.some(u => u.username.toLowerCase() === username.toLowerCase()))
       return json(res, 409, { error: 'Такой логин уже занят' });
-    const u = { id: id(), username: username.trim(), password: hashPassword(password), avatar: Math.floor(Math.random() * 12) };
+    const avatarNum = Number(avatar);
+    if (avatar === undefined || avatar === null || avatar === '' || !Number.isInteger(avatarNum) || avatarNum < 0 || avatarNum >= AVATAR_COUNT)
+      return json(res, 400, { error: 'Выберите аватарку' });
+    const u = { id: id(), username: username.trim(), password: hashPassword(password), avatar: avatarNum };
     db.users.push(u);
     createSession(res, u.id);
     return json(res, 200, { username: u.username, avatar: u.avatar });
@@ -280,7 +287,7 @@ async function api(req, res, url) {
         email: info.email || null,
         username: uniqueUsername(info.name || (info.email || '').split('@')[0]),
         password: null,
-        avatar: Math.floor(Math.random() * 12),
+        avatar: Math.floor(Math.random() * AVATAR_COUNT),
       };
       db.users.push(u);
     }
@@ -303,10 +310,11 @@ async function api(req, res, url) {
   }
 
   // ============================================================
-  // КАПИТАНЫ — доступ по секретному токену из ссылки, без логина
+  // КАПИТАНЫ — доступ по секретному токену из ссылки, после входа
   // ============================================================
   const vetoMatch = p.match(/^\/api\/veto\/([a-f0-9]{32})(\/action)?$/);
   if (vetoMatch) {
+    if (!user) return json(res, 401, { error: 'Требуется вход' });
     const token = vetoMatch[1];
     const m = db.matches.find(x => x.tokenA === token || x.tokenB === token);
     if (!m) return json(res, 404, { error: 'Ссылка недействительна — матч не найден' });
@@ -354,9 +362,10 @@ async function api(req, res, url) {
   }
 
   // ============================================================
-  // НАБЛЮДАТЕЛИ — по коду, без логина
+  // НАБЛЮДАТЕЛИ — по коду, после входа
   // ============================================================
   if (p === '/api/spectate' && req.method === 'GET') {
+    if (!user) return json(res, 401, { error: 'Требуется вход' });
     const code = cleanCode(url.searchParams.get('code'));
     const m = db.matches.find(x => x.code === code);
     if (!m) return json(res, 404, { error: 'Матч не найден — проверьте ссылку/код' });
@@ -379,7 +388,7 @@ async function api(req, res, url) {
   if (p === '/api/avatar' && req.method === 'POST') {
     const { avatar } = await readBody(req);
     const n = Number(avatar);
-    if (!Number.isInteger(n) || n < 0 || n > 11) return json(res, 400, { error: 'Неверная аватарка' });
+    if (!Number.isInteger(n) || n < 0 || n >= AVATAR_COUNT) return json(res, 400, { error: 'Неверная аватарка' });
     user.avatar = n;
     save();
     return json(res, 200, { username: user.username, avatar: n });

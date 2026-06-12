@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Map Veto помогает быстро провести CS2 veto: ссылки капитанам, live-просмотр для зрителей, автоматический порядок банов, пиков, сторон и decider.">
 <title>Map Veto — CS2</title>
 <style>
   :root {
@@ -33,11 +34,11 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scrollbar-gutter: stable both-edges; overflow-y: scroll; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
                  "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--bg); color: var(--text); min-height: 100vh; letter-spacing: -0.01em;
+    background: var(--bg); color: var(--text); min-height: 100vh; letter-spacing: -0.01em; overflow-x: hidden;
   }
   ::selection { background: rgba(0,113,227,.18); }
 
@@ -103,6 +104,10 @@
     transition: box-shadow .5s var(--ease), transform .5s var(--ease);
   }
   .card.hoverable:hover { box-shadow: var(--shadow-2); transform: translateY(-2px); }
+  .create-card { padding-top: 34px; }
+  .create-head { margin-bottom: 30px; }
+  .create-head .section { font-size: 26px; margin-bottom: 6px; }
+  .create-head .section-sub { margin-bottom: 0; max-width: 760px; font-size: 16px; line-height: 1.45; }
 
   /* ---------- формы ---------- */
   .field { margin-bottom: 12px; }
@@ -114,6 +119,17 @@
   }
   input:focus { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px rgba(0,113,227,.12); }
   input::placeholder { color: var(--text-3); }
+  .password-field { position: relative; }
+  .password-field input { padding-right: 52px; }
+  .pw-toggle {
+    position: absolute; right: 7px; top: 7px; width: 36px; height: 36px;
+    border: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.045); color: var(--text-2);
+    transition: background .25s var(--ease), color .25s var(--ease), transform .2s var(--ease);
+  }
+  .pw-toggle:hover { background: rgba(0,0,0,.075); color: var(--text); }
+  .pw-toggle:active { transform: scale(.94); }
 
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -139,6 +155,53 @@
     transition: background .3s var(--ease), transform .25s var(--ease), box-shadow .3s var(--ease);
   }
   .btn-google:hover { background: var(--surface-2); box-shadow: var(--shadow-1); transform: scale(1.015); }
+  .btn-google:active { transform: scale(.975); }
+  .btn-google .g-mark {
+    width: 24px; height: 24px; border-radius: 50%; background: #fff;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+
+  .auth-access {
+    min-height: calc(100vh - 128px);
+    display: grid; grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 22px; align-items: center; padding: 28px 0 46px;
+  }
+  .access-panel {
+    position: relative; overflow: hidden;
+    min-height: 430px; border-radius: 30px; padding: clamp(28px, 5vw, 54px);
+    background:
+      radial-gradient(circle at 20% 15%, rgba(0,113,227,.18), transparent 34%),
+      linear-gradient(135deg, #fff, #f7f8fb 58%, #eef4ff);
+    border: 1px solid rgba(0,0,0,.06); box-shadow: var(--shadow-1);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .access-panel::after {
+    content: ""; position: absolute; right: -90px; bottom: -120px; width: 290px; height: 290px;
+    border-radius: 50%; background: radial-gradient(circle, rgba(0,113,227,.18), transparent 62%);
+    pointer-events: none;
+  }
+  .access-kicker {
+    width: 52px; height: 52px; border-radius: 18px; margin-bottom: 22px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--blue); color: #fff; box-shadow: 0 16px 34px rgba(0,113,227,.24);
+  }
+  .access-title { font-size: clamp(34px, 5vw, 58px); font-weight: 750; letter-spacing: -.045em; line-height: .98; text-wrap: balance; }
+  .access-sub { color: var(--text-2); font-size: 17px; line-height: 1.5; max-width: 460px; margin-top: 18px; }
+  .access-chip {
+    display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+    margin-top: 28px; padding: 9px 14px; border-radius: 980px;
+    background: rgba(0,113,227,.09); color: var(--blue); font-size: 13px; font-weight: 650;
+  }
+  .auth-card { max-width: 400px; width: 100%; margin: 0 auto; }
+  .auth-access .auth-card { margin: 0; box-shadow: var(--shadow-2); }
+  @media (max-width: 860px) {
+    .auth-access { grid-template-columns: 1fr; padding-top: 10px; }
+    .access-panel { min-height: auto; padding: 28px; }
+    .access-title { font-size: 34px; }
+    .access-sub { font-size: 15px; }
+    .auth-access .auth-card { margin: 0 auto; }
+  }
 
   .divider { display: flex; align-items: center; gap: 14px; color: var(--text-3); font-size: 13px; margin: 18px 0; }
   .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
@@ -160,14 +223,17 @@
   .segment.n3 .thumb { width: calc(33.333% - 2px); }
   .segment.n3[data-i="1"] .thumb { transform: translateX(100%); }
   .segment.n3[data-i="2"] .thumb { transform: translateX(200%); }
-
-  .fmt-info {
-    background: var(--surface-2); border: 1px solid var(--hairline);
-    border-radius: var(--radius-s); padding: 14px 16px; margin: 12px 0 16px;
-    transition: opacity .3s var(--ease);
+  .format-segment {
+    height: 50px; padding: 4px; border-radius: 15px;
+    background: rgba(0,0,0,.045);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.035);
   }
-  .fmt-info .fi-title { font-size: 14px; font-weight: 650; }
-  .fmt-info .fi-text { font-size: 13px; color: var(--text-2); line-height: 1.55; margin-top: 4px; }
+  .format-segment button { height: 42px; border-radius: 12px; font-weight: 650; }
+  .segment.n3.format-segment .thumb {
+    top: 4px; bottom: 4px; left: 4px;
+    width: calc((100% - 8px) / 3); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  }
 
   .form-msg { min-height: 20px; font-size: 14px; color: var(--red); margin-bottom: 8px; }
 
@@ -617,36 +683,120 @@
 
   /* ---------- модалка аватарки ---------- */
   .modal-bg {
-    position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.32);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    position: fixed; inset: 0; z-index: 90;
+    background:
+      radial-gradient(circle at 50% 26%, rgba(255,255,255,.36), transparent 28%),
+      rgba(0,0,0,.36);
+    backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
     display: flex; align-items: center; justify-content: center; padding: 20px;
-    opacity: 0; pointer-events: none; transition: opacity .4s var(--ease);
+    opacity: 0; pointer-events: none; transition: opacity .32s var(--ease);
   }
   .modal-bg.open { opacity: 1; pointer-events: auto; }
   .modal {
-    background: var(--surface); border-radius: var(--radius-l); padding: 28px;
-    max-width: 380px; width: 100%; box-shadow: var(--shadow-2);
-    transform: translateY(26px) scale(.96); transition: transform .45s var(--ease);
+    background: rgba(255,255,255,.96); border-radius: 28px; padding: 30px;
+    max-width: 460px; width: min(100%, 460px); box-shadow: 0 28px 80px rgba(0,0,0,.22), 0 1px 0 rgba(255,255,255,.75) inset;
+    transform: translateY(18px) scale(.92); opacity: 0; filter: blur(6px);
+    transition: transform .5s var(--ease-out), opacity .38s var(--ease), filter .45s var(--ease);
   }
-  .modal-bg.open .modal { transform: translateY(0) scale(1); }
-  .modal h3 { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
-  .modal p { font-size: 13px; color: var(--text-2); margin-bottom: 18px; }
+  .modal-bg.open .modal { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+  .modal h3 { font-size: 22px; font-weight: 750; letter-spacing: -.03em; margin-bottom: 4px; text-align: center; text-wrap: balance; }
+  .modal p { font-size: 13px; color: var(--text-2); margin-bottom: 22px; text-align: center; line-height: 1.45; }
+  .ava-modal { position: relative; overflow: hidden; }
+  .ava-modal::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 120px; pointer-events: none;
+    background: radial-gradient(circle at 50% 0%, rgba(0,113,227,.14), transparent 62%);
+  }
+  .ava-modal > * { position: relative; }
+
   .ava {
     display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 50%; flex-shrink: 0; user-select: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+    border-radius: 50%; flex-shrink: 0; user-select: none; overflow: hidden;
+    background: #fff; border: 2px solid rgba(255,255,255,.92);
+    box-shadow: 0 2px 10px rgba(0,0,0,.10);
   }
-  .ava.s28 { width: 30px; height: 30px; font-size: 16px; }
-  .nav-ava { cursor: pointer; transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
-  .nav-ava:hover { transform: scale(1.12); }
-  .ava-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ava.s28 { width: 36px; height: 36px; }
+  .nav-ava { cursor: default; }
+
+  .ava-grid {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 18px 20px; max-width: 360px; margin: 0 auto;
+  }
   .ava-pick {
-    aspect-ratio: 1; border-radius: 50%; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 26px;
-    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+    width: 98px; height: 98px; border-radius: 50%; border: none; cursor: pointer; padding: 5px;
+    position: relative; overflow: visible; background: rgba(255,255,255,.92);
+    transition: transform .24s var(--ease), box-shadow .24s var(--ease), filter .24s var(--ease), opacity .24s var(--ease), background .24s var(--ease);
+    box-shadow: 0 10px 28px rgba(0,0,0,.13), inset 0 0 0 1px rgba(0,0,0,.05);
   }
-  .ava-pick:hover { transform: scale(1.12); }
-  .ava-pick.current { box-shadow: 0 0 0 3px var(--blue), inset 0 0 0 1px rgba(0,0,0,.06); }
+  .ava-pick img {
+    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+  }
+  .ava-pick:hover { transform: scale(1.035); box-shadow: 0 16px 38px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.05); }
+  .ava-pick.current {
+    background: #fff;
+    box-shadow: 0 0 0 3px var(--blue), 0 10px 28px rgba(0,0,0,.13);
+  }
+  .ava-pick.current img { box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+
+  .avatar-case { --case-h: 124px; position: relative; width: 100%; max-width: 390px; margin: 0 auto; }
+  .case-window {
+    position: relative; overflow: hidden; height: 124px; border-radius: 28px;
+    background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(245,247,251,.92));
+    border: 1px solid rgba(0,0,0,.07);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -18px 34px rgba(0,0,0,.035), 0 14px 36px rgba(0,0,0,.08);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 15%, #000 85%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 15%, #000 85%, transparent 100%);
+  }
+  .case-window::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 50%; z-index: 3;
+    width: 2px; transform: translateX(-50%); opacity: 1;
+    background: linear-gradient(180deg, transparent, var(--blue) 22%, var(--blue) 78%, transparent);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.75), 0 0 18px rgba(0,113,227,.28);
+    transition: opacity .36s var(--ease);
+  }
+  .case-window.revealed::before { opacity: 0; }
+  .case-track {
+    height: 100%; display: flex; align-items: center; gap: 12px; padding: 0 150px;
+    transform: translateX(0); will-change: transform;
+  }
+  .case-item {
+    width: 88px; height: 88px; flex: 0 0 88px; border-radius: 50%; padding: 4px; background: #fff;
+    box-shadow: 0 8px 22px rgba(0,0,0,.13), inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+  .case-item img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+  .case-result { min-height: 22px; margin-top: 28px; text-align: center; font-size: 13px; font-weight: 650; color: var(--text-2); }
+  .case-result.ready { color: var(--blue); }
+  .case-pop {
+    position: absolute; z-index: 8; left: 50%; top: calc(var(--case-h) / 2);
+    width: 104px; height: 104px; padding: 0; border-radius: 50%;
+    background: transparent; opacity: 0; pointer-events: none;
+    transform: translate(-50%, -50%) scale(.86);
+    transform-origin: center center;
+    box-shadow: 0 0 0 3px var(--blue), 0 28px 62px rgba(0,113,227,.26), 0 12px 32px rgba(0,0,0,.18);
+    transition: opacity .24s var(--ease), transform .7s var(--ease-out), box-shadow .7s var(--ease-out);
+  }
+  .case-pop.show { opacity: 1; transform: translate(-50%, -50%) scale(1.28); }
+  .case-pop img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+
+  .ava-modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .ava-modal-actions:empty { display: none; }
+  .ava-modal-actions .btn { flex: 1; min-width: 0; font-weight: 600; }
+  @media (max-width: 520px) {
+    .modal { padding: 26px; border-radius: 24px; }
+    .ava-grid { gap: 14px; max-width: 300px; }
+    .ava-pick { width: 84px; height: 84px; padding: 4px; }
+    .avatar-case { --case-h: 112px; }
+    .case-window { height: var(--case-h); border-radius: 24px; }
+    .case-track { padding: 0 118px; gap: 10px; }
+    .case-item { width: 78px; height: 78px; flex-basis: 78px; }
+    .case-pop { width: 94px; height: 94px; }
+    .case-pop.show { transform: translate(-50%, -50%) scale(1.2); }
+    .ava-modal-actions { flex-wrap: wrap; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .modal { filter: none; }
+  }
 
   /* ---------- тост ---------- */
   #toast {
@@ -681,10 +831,11 @@
 <div class="final-overlay" id="final-overlay"></div>
 
 <div class="modal-bg" id="ava-modal" onclick="if(event.target===this)closeAvaModal()">
-  <div class="modal">
-    <h3>Ваша аватарка</h3>
-    <p>Аватарка профиля организатора.</p>
+  <div class="modal ava-modal">
+    <h3 id="ava-modal-title">Ваша аватарка</h3>
+    <p id="ava-modal-text">Аватарка профиля.</p>
     <div class="ava-grid" id="ava-grid"></div>
+    <div class="ava-modal-actions" id="ava-modal-actions"></div>
   </div>
 </div>
 
@@ -701,27 +852,30 @@ let lastRenderKey = '';
 let finalShown = false;     // показывали ли финальный оверлей в этой сессии страницы
 let captainToken = null;    // токен капитана из URL
 let spectateCode = null;    // код наблюдателя из URL
+let pendingPathAfterAuth = null; // ссылка /veto или /watch, которую откроем после входа
+let selectedAvatar = null;
+let avatarRollBusy = false;
+let avatarRollTimer = null;
+let avatarAudioCtx = null;
 
 const AVATARS = [
-  { e: '🐺', g: ['#5b6b7c', '#90a4b8'] }, { e: '🦊', g: ['#c96a3b', '#e9a06b'] },
-  { e: '🐻', g: ['#7a5c43', '#a98a68'] }, { e: '🦅', g: ['#4a5d73', '#7e95ad'] },
-  { e: '🐯', g: ['#c98a2e', '#e8b85e'] }, { e: '🐉', g: ['#3e7a55', '#6fae87'] },
-  { e: '👻', g: ['#6d6d80', '#a3a3b8'] }, { e: '🤖', g: ['#4a7d8c', '#7fb3c2'] },
-  { e: '💀', g: ['#5a5a5a', '#929292'] }, { e: '🔥', g: ['#c2502e', '#e8845e'] },
-  { e: '⚡', g: ['#b09134', '#dcc06a'] }, { e: '❄️', g: ['#4f7fa8', '#86b4d8'] },
+  { src: '/img/avatars/1.png', name: 'Аватар 1' },
+  { src: '/img/avatars/2.png', name: 'Аватар 2' },
+  { src: '/img/avatars/3.png', name: 'Аватар 3' },
+  { src: '/img/avatars/4.png', name: 'Аватар 4' },
+  { src: '/img/avatars/5.png', name: 'Аватар 5' },
 ];
+function avaInfo(idx) { return AVATARS[idx] || AVATARS[0]; }
 function avaHTML(idx, size) {
-  const a = AVATARS[idx ?? 0] || AVATARS[0];
-  return `<span class="ava ${size}" style="background:linear-gradient(135deg,${a.g[0]},${a.g[1]})">${a.e}</span>`;
+  const a = avaInfo(idx ?? 0);
+  return `<span class="ava ${size}"><img src="${a.src}" alt=""></span>`;
+}
+function avatarButtonHTML(i, cls, handler) {
+  const a = avaInfo(i);
+  return `<button type="button" class="${cls} ${i === selectedAvatar ? 'current' : ''}" onclick="${handler}(${i})"><img src="${a.src}" alt="${a.name}"></button>`;
 }
 
 const MAP_IMG = id => `/img/maps/${id}.jpg`;
-
-const FORMAT_INFO = {
-  BO1: { title: 'Best of 1 · одна карта', text: 'Команды по очереди банят карты. Последняя оставшаяся будет сыграна, стороны разыграет монетка.' },
-  BO3: { title: 'Best of 3 · до 2 побед', text: 'Бан–бан, затем каждая команда пикает карту (соперник выбирает сторону на ней), оставшиеся баны — и решающая карта с монеткой.' },
-  BO5: { title: 'Best of 5 · до 3 побед', text: 'Три бана, четыре пика со сторонами от соперника, последняя карта — решающая с монеткой.' },
-};
 
 /* ------------------------------------------------ API + утилиты */
 async function api(path, opts = {}) {
@@ -872,19 +1026,25 @@ function readLogoFile(file) {
 /* ------------------------------------------------ Userbox / профиль */
 function renderUserbox() {
   $('#userbox').innerHTML = me
-    ? `<span class="nav-ava" onclick="openAvaModal()" title="Сменить аватарку">${avaHTML(myAvatar, 's28')}</span>
+    ? `<span class="nav-ava">${avaHTML(myAvatar, 's28')}</span>
        <span><b>${esc(me)}</b></span>
        <button class="btn link" onclick="logout()">Выйти</button>`
     : '';
 }
 function openAvaModal() {
-  $('#ava-grid').innerHTML = AVATARS.map((a, i) => `
-    <button class="ava-pick ${i === myAvatar ? 'current' : ''}"
-      style="background:linear-gradient(135deg,${a.g[0]},${a.g[1]})"
-      onclick="chooseAvatar(${i})">${a.e}</button>`).join('');
+  selectedAvatar = myAvatar || 0;
+  $('#ava-modal-title').textContent = 'Ваша аватарка';
+  $('#ava-modal-text').textContent = 'Выберите картинку профиля.';
+  $('#ava-grid').className = 'ava-grid';
+  $('#ava-grid').innerHTML = AVATARS.map((_, i) => avatarButtonHTML(i, 'ava-pick', 'chooseAvatar')).join('');
+  $('#ava-modal-actions').innerHTML = '';
   $('#ava-modal').classList.add('open');
 }
-function closeAvaModal() { $('#ava-modal').classList.remove('open'); }
+function closeAvaModal() {
+  avatarRollBusy = false;
+  clearTimeout(avatarRollTimer);
+  $('#ava-modal').classList.remove('open');
+}
 async function chooseAvatar(i) {
   try {
     await api('/api/avatar', { method: 'POST', body: { avatar: i } });
@@ -914,14 +1074,16 @@ function initGoogleButton() {
     return;
   }
   slot.innerHTML = `
-    <button class="btn-google" id="g-btn">
-      <svg width="18" height="18" viewBox="0 0 48 48">
-        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
-        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
-        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/>
-      </svg>
-      Войти через Google
+    <button class="btn-google" id="g-btn" type="button">
+      <span class="g-mark">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+        </svg>
+      </span>
+      Продолжить с Google
     </button>`;
   const start = () => {
     google.accounts.id.initialize({
@@ -930,20 +1092,24 @@ function initGoogleButton() {
         try {
           const d = await api('/api/auth/google', { method: 'POST', body: { credential: resp.credential } });
           me = d.username; myAvatar = d.avatar || 0;
-          renderUserbox(); renderDashboard();
+          continueAfterAuth();
           toast(`Добро пожаловать, ${d.username}!`, true);
         } catch (e) { toast(e.message); }
       },
     });
-    $('#g-btn').onclick = () => google.accounts.id.prompt();
-    google.accounts.id.renderButton($('#g-btn'), { type: 'standard', theme: 'outline', size: 'large', width: 320 });
+    $('#g-btn').onclick = () => {
+      google.accounts.id.prompt((n) => {
+        if (n.isNotDisplayed && n.isNotDisplayed()) toast('Google не открыл вход. Проверьте Authorized JavaScript origins');
+        else if (n.isSkippedMoment && n.isSkippedMoment()) toast('Окно Google закрыто или пропущено');
+      });
+    };
   };
   if (window.google && google.accounts) start();
   else {
     const s = document.createElement('script');
     s.src = 'https://accounts.google.com/gsi/client';
     s.async = true; s.onload = start;
-    s.onerror = () => { const b = $('#g-btn'); if (b) b.onclick = () => toast('Не удалось загрузить Google SDK'); };
+    s.onerror = () => toast('Не удалось загрузить Google SDK');
     document.head.appendChild(s);
   }
 }
@@ -951,16 +1117,32 @@ function initGoogleButton() {
 /* ------------------------------------------------ Авторизация организатора */
 let authMode = 'login';
 
-function renderAuth() {
+function renderAuth(message = '', context = 'default') {
   authMode = 'login';
+  selectedAvatar = null;
+  const linkMode = context === 'link';
+  const authIntro = linkMode ? 'Войдите, чтобы открыть ссылку' : (message || 'Вход для организатора матча');
   setPage(`
-    <div>
-      <div style="padding: 40px 0 36px;">
-        <h1 class="hero-title">Map Veto.<br><span class="accent">Как на турнирах.</span></h1>
-        <p class="hero-sub">Организатор создаёт матч и отправляет капитанам ссылки.<br>Команды банят и пикают — зрители смотрят в реальном времени.</p>
-      </div>
-      <div class="card" style="max-width:400px;margin:0 auto;">
-        <p style="font-size:13px;color:var(--text-3);text-align:center;margin-bottom:16px;">Вход для организатора матча</p>
+    <div class="${linkMode ? 'auth-access' : ''}">
+      ${linkMode ? `
+        <div class="access-panel">
+          <div class="access-kicker">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7.75 10V7.8C7.75 5.35 9.55 3.5 12 3.5s4.25 1.85 4.25 4.3V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M6.8 10h10.4c1.05 0 1.8.75 1.8 1.8v6.1c0 1.05-.75 1.8-1.8 1.8H6.8c-1.05 0-1.8-.75-1.8-1.8v-6.1c0-1.05.75-1.8 1.8-1.8Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 14v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h1 class="access-title">Сначала войдите</h1>
+          <p class="access-sub">Мы запомним ссылку матча и сразу откроем её после авторизации. Это защищает капитанские и зрительские страницы от случайных гостей.</p>
+          <div class="access-chip">Ссылка матча сохранена</div>
+        </div>` : `
+        <div style="padding: 40px 0 36px;">
+          <h1 class="hero-title">Map Veto.<br><span class="accent">Veto за минуту.</span></h1>
+          <p class="hero-sub">Создайте матч, отправьте ссылки капитанам и следите за veto в реальном времени.</p>
+        </div>`}
+      <div class="card auth-card">
+        ${linkMode ? `<p style="font-size:13px;color:var(--text-3);text-align:center;margin-bottom:16px;">${authIntro}</p>` : ''}
         <div class="segment n2" id="auth-seg" data-i="0" style="margin-bottom:22px;">
           <div class="thumb"></div>
           <button class="on" onclick="switchAuth('login')">Вход</button>
@@ -968,20 +1150,35 @@ function renderAuth() {
         </div>
         <div>
           <div class="form-msg" id="auth-err"></div>
-          <div class="field"><input id="username" placeholder="Логин" autocomplete="username"></div>
-          <div class="field"><input id="password" type="password" placeholder="Пароль" autocomplete="current-password"></div>
+          <div class="field"><input id="username" placeholder="Логин" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" name="mapveto-login-${Date.now()}" readonly onfocus="this.removeAttribute('readonly')"></div>
+          <div class="field password-field">
+            <input id="password" type="password" placeholder="Пароль" autocomplete="current-password">
+            <button class="pw-toggle" type="button" onclick="togglePassword()" aria-label="Показать пароль" title="Показать пароль" id="pw-toggle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 12s3-5 8.5-5 8.5 5 8.5 5-3 5-8.5 5-8.5-5-8.5-5Z" stroke="currentColor" stroke-width="1.8"/><path d="M12 14.7a2.7 2.7 0 1 0 0-5.4 2.7 2.7 0 0 0 0 5.4Z" stroke="currentColor" stroke-width="1.8"/></svg>
+            </button>
+          </div>
           <button class="btn full" id="auth-btn" style="overflow:hidden;"><span class="btn-label" id="auth-btn-label">Войти</span></button>
         </div>
         <div class="divider">или</div>
         <div id="google-slot"></div>
       </div>
-      <p style="text-align:center;color:var(--text-3);font-size:13px;margin-top:22px;line-height:1.6;">
-        Капитан или зритель? Вам не нужен аккаунт —<br>просто откройте ссылку, которую прислал организатор.
-      </p>
     </div>`, () => {
     bindAuthForm();
     initGoogleButton();
   });
+}
+
+function togglePassword() {
+  const input = $('#password');
+  const btn = $('#pw-toggle');
+  if (!input || !btn) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+  btn.title = show ? 'Скрыть пароль' : 'Показать пароль';
+  btn.innerHTML = show
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9.5 5.5A9.8 9.8 0 0 1 12 5c5.5 0 8.5 5 8.5 5a13.3 13.3 0 0 1-2.2 2.7M6.4 7.2C4.5 8.5 3.5 10 3.5 10s3 5 8.5 5c1 0 2-.17 2.8-.47" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.2 8.4a2.7 2.7 0 0 1 3.4 3.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 12s3-5 8.5-5 8.5 5 8.5 5-3 5-8.5 5-8.5-5-8.5-5Z" stroke="currentColor" stroke-width="1.8"/><path d="M12 14.7a2.7 2.7 0 1 0 0-5.4 2.7 2.7 0 0 0 0 5.4Z" stroke="currentColor" stroke-width="1.8"/></svg>`;
 }
 
 function switchAuth(mode) {
@@ -992,6 +1189,8 @@ function switchAuth(mode) {
   seg.dataset.i = mode === 'login' ? '0' : '1';
   seg.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', (mode === 'login') === (i === 0)));
   $('#auth-err').textContent = '';
+  const password = $('#password');
+  if (password) password.autocomplete = mode === 'login' ? 'current-password' : 'new-password';
 
   // Поля логин/пароль НЕ трогаем — введённое сохраняется.
   // Меняется только текст кнопки: уезжает в сторону движения ползунка,
@@ -1008,23 +1207,189 @@ function switchAuth(mode) {
   }, 220);
 }
 
+function ensureAvatarAudio() {
+  try {
+    avatarAudioCtx = avatarAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (avatarAudioCtx.state === 'suspended') avatarAudioCtx.resume();
+  } catch (e) {}
+}
+function playAvatarTone(freq, duration = .035, volume = .035) {
+  if (!avatarAudioCtx) return;
+  try {
+    const t = avatarAudioCtx.currentTime;
+    const osc = avatarAudioCtx.createOscillator();
+    const gain = avatarAudioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(volume, t + .006);
+    gain.gain.exponentialRampToValueAtTime(.0001, t + duration);
+    osc.connect(gain); gain.connect(avatarAudioCtx.destination);
+    osc.start(t); osc.stop(t + duration + .01);
+  } catch (e) {}
+}
+function playAvatarTick() { playAvatarTone(760 + Math.random() * 120, .032, .028); }
+function playAvatarWin() {
+  playAvatarTone(560, .08, .04);
+  setTimeout(() => playAvatarTone(880, .12, .045), 90);
+}
+function avatarRollItems(target, finalIndex) {
+  const items = [];
+  for (let i = 0; i <= finalIndex + 10; i++) {
+    const idx = i === finalIndex ? target : Math.floor(Math.random() * AVATARS.length);
+    items.push(`<div class="case-item" data-roll-index="${i}" data-avatar="${idx}"><img src="${avaInfo(idx).src}" alt=""></div>`);
+  }
+  return items.join('');
+}
+function centerRollOn(track, item, duration = 4600, easing = 'cubic-bezier(.08,.78,.05,1)', offset = 0) {
+  const win = track.parentElement;
+  if (!win || !item) return 0;
+  const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+  const winCenter = win.clientWidth / 2;
+  const targetX = winCenter - itemCenter + offset;
+  track.style.transition = `transform ${duration}ms ${easing}`;
+  track.style.transform = `translateX(${targetX}px)`;
+  return targetX;
+}
+function startAvatarRoll() {
+  if (avatarRollBusy) return;
+  const track = $('#avatar-case-track');
+  const result = $('#avatar-case-result');
+  if (!track || !result) return;
+
+  ensureAvatarAudio();
+  avatarRollBusy = true;
+  selectedAvatar = null;
+  clearTimeout(avatarRollTimer);
+  const rerollBtn = $('#auth-avatar-reroll');
+  const continueBtn = $('#auth-avatar-continue');
+  if (rerollBtn) rerollBtn.disabled = true;
+  if (continueBtn) continueBtn.disabled = true;
+  const caseWindow = track.closest('.case-window');
+  if (caseWindow) caseWindow.classList.remove('revealed');
+  const pop = $('#avatar-case-pop');
+  if (pop) {
+    pop.classList.remove('show');
+    const popImg = pop.querySelector('img');
+    if (popImg) popImg.src = '';
+  }
+  result.classList.remove('ready');
+  result.textContent = 'Кейс крутится...';
+
+  const target = Math.floor(Math.random() * AVATARS.length);
+  const finalIndex = 82 + Math.floor(Math.random() * 16);
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0px)';
+  track.innerHTML = avatarRollItems(target, finalIndex);
+
+  const startTime = Date.now();
+  const tickLoop = () => {
+    if (!avatarRollBusy) return;
+    playAvatarTick();
+    const elapsed = Date.now() - startTime;
+    const delay = Math.min(280, 34 + elapsed / 28);
+    avatarRollTimer = setTimeout(tickLoop, delay);
+  };
+  tickLoop();
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const targetItem = track.querySelector(`.case-item[data-roll-index="${finalIndex}"]`);
+    if (!targetItem) return;
+    // Основной roll останавливается немного правее центрального маркера,
+    // затем лента плавно докручивается к той же выпавшей аватарке, без рандомной смены цели.
+    centerRollOn(track, targetItem, 9200, 'cubic-bezier(.06,.78,.04,1)', 46);
+    track.ontransitionend = () => {
+      track.ontransitionend = null;
+      clearTimeout(avatarRollTimer);
+      centerRollOn(track, targetItem, 900, 'cubic-bezier(.16,1,.3,1)', 0);
+      track.ontransitionend = () => {
+        track.ontransitionend = null;
+        avatarRollBusy = false;
+        selectedAvatar = target;
+        result.textContent = 'Готово, можно продолжить';
+        result.classList.add('ready');
+        const caseWindow = track.closest('.case-window');
+        if (caseWindow) caseWindow.classList.add('revealed');
+        const pop = $('#avatar-case-pop');
+        const popImg = pop ? pop.querySelector('img') : null;
+        if (popImg) popImg.src = avaInfo(target).src;
+        if (pop) requestAnimationFrame(() => pop.classList.add('show'));
+        if (rerollBtn) rerollBtn.disabled = false;
+        if (continueBtn) continueBtn.disabled = false;
+        playAvatarWin();
+      };
+    };
+  }));
+}
+function openAuthAvatarModal() {
+  selectedAvatar = null;
+  $('#ava-modal-title').textContent = 'Кейс аватарки';
+  $('#ava-modal-text').textContent = 'Ролл запустится автоматически. Можно сделать реролл перед регистрацией.';
+  $('#ava-grid').className = 'avatar-case';
+  $('#ava-grid').innerHTML = `
+    <div class="case-window"><div class="case-track" id="avatar-case-track"></div></div>
+    <div class="case-pop" id="avatar-case-pop"><img src="" alt=""></div>
+    <div class="case-result" id="avatar-case-result">Готовим кейс...</div>`;
+  $('#ava-modal-actions').innerHTML = `
+    <button class="btn quiet" onclick="closeAvaModal()">Назад</button>
+    <button class="btn quiet" id="auth-avatar-reroll" onclick="startAvatarRoll()" disabled>Реролл</button>
+    <button class="btn" id="auth-avatar-continue" onclick="finishRegisterAfterAvatar()" disabled>Продолжить</button>`;
+  $('#ava-modal').classList.add('open');
+  startAvatarRoll();
+}
+function finishRegisterAfterAvatar() {
+  if (avatarRollBusy) { toast('Дождитесь окончания ролла'); return; }
+  if (selectedAvatar === null) { toast('Сначала прокрутите кейс'); return; }
+  closeAvaModal();
+  performAuthSubmit();
+}
+
+function continueAfterAuth() {
+  renderUserbox();
+  const path = pendingPathAfterAuth;
+  pendingPathAfterAuth = null;
+  if (path) {
+    history.replaceState(null, '', path);
+    const mVeto = path.match(/^\/veto\/([a-f0-9]{32})$/);
+    const mWatch = path.match(/^\/watch\/([A-Za-z0-9]+)$/);
+    if (mVeto) return openCaptain(mVeto[1]);
+    if (mWatch) return openSpectate(mWatch[1]);
+  }
+  renderDashboard();
+}
+
+async function performAuthSubmit() {
+  const btn = $('#auth-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const d = await api(authMode === 'login' ? '/api/login' : '/api/register', {
+      method: 'POST',
+      body: { username: $('#username').value.trim(), password: $('#password').value, avatar: selectedAvatar },
+    });
+    me = d.username; myAvatar = d.avatar || 0;
+    continueAfterAuth();
+  } catch (e) {
+    $('#auth-err').textContent = e.message;
+    if (btn) btn.disabled = false;
+  }
+}
 function bindAuthForm() {
   const submit = async () => {
-    const btn = $('#auth-btn');
-    btn.disabled = true;
-    try {
-      const d = await api(authMode === 'login' ? '/api/login' : '/api/register', {
-        method: 'POST',
-        body: { username: $('#username').value.trim(), password: $('#password').value },
-      });
-      me = d.username; myAvatar = d.avatar || 0;
-      renderUserbox(); renderDashboard();
-    } catch (e) { $('#auth-err').textContent = e.message; btn.disabled = false; }
+    $('#auth-err').textContent = '';
+    if (authMode === 'register') {
+      const username = $('#username').value.trim();
+      const password = $('#password').value;
+      if (!username || !password || username.length < 2 || password.length < 4) {
+        $('#auth-err').textContent = 'Логин от 2 символов, пароль от 4';
+        return;
+      }
+      openAuthAvatarModal();
+      return;
+    }
+    performAuthSubmit();
   };
   $('#auth-btn').onclick = submit;
   $('#password').onkeydown = e => { if (e.key === 'Enter') submit(); };
 }
-
 /* ------------------------------------------------ Кабинет организатора */
 let chosenFormat = 'BO3';
 let logoA = null, logoB = null;
@@ -1059,26 +1424,23 @@ async function onLogoFile(target, input) {
 
 function renderDashboard() {
   chosenFormat = 'BO3'; logoA = null; logoB = null;
-  const fi = FORMAT_INFO.BO3;
   setPage(`
     <div>
-      <div class="card" style="margin-bottom:18px;">
-        <h2 class="section">Новый матч</h2>
-        <p class="section-sub">Задайте обе команды и формат — получите ссылки для капитанов и зрителей.</p>
+      <div class="card create-card" style="margin-bottom:18px;">
+        <div class="create-head">
+          <h2 class="section">Новый матч</h2>
+          <p class="section-sub">Укажите команды, выберите BO и получите ссылки для капитанов и зрителей.</p>
+        </div>
         <div class="form-msg" id="create-err"></div>
         <div class="team-setup">
           ${teamSetupBox('A')}
           ${teamSetupBox('B')}
         </div>
-        <div class="segment n3" id="fmt-seg" data-i="1" style="margin-top:10px;">
+        <div class="segment n3 format-segment" id="fmt-seg" data-i="1" style="margin-top:10px;margin-bottom:18px;">
           <div class="thumb"></div>
           <button onclick="pickFormat('BO1',0)">BO1</button>
           <button class="on" onclick="pickFormat('BO3',1)">BO3</button>
           <button onclick="pickFormat('BO5',2)">BO5</button>
-        </div>
-        <div class="fmt-info" id="fmt-info">
-          <div class="fi-title">${fi.title}</div>
-          <div class="fi-text">${fi.text}</div>
         </div>
         <button class="btn full" onclick="createMatch()">Создать матч и получить ссылки</button>
       </div>
@@ -1092,17 +1454,11 @@ function renderDashboard() {
 }
 
 function pickFormat(fmt, i) {
+  if (fmt === chosenFormat) return;
   chosenFormat = fmt;
   const seg = $('#fmt-seg');
   seg.dataset.i = String(i);
   seg.querySelectorAll('button').forEach((b, bi) => b.classList.toggle('on', bi === i));
-  const info = $('#fmt-info');
-  info.style.opacity = 0;
-  setTimeout(() => {
-    const fi = FORMAT_INFO[fmt];
-    info.innerHTML = `<div class="fi-title">${fi.title}</div><div class="fi-text">${fi.text}</div>`;
-    info.style.opacity = 1;
-  }, 180);
 }
 
 async function loadMatches() {
@@ -1208,6 +1564,11 @@ async function openCaptain(token) {
       } catch (e) {}
     }, 2000);
   } catch (e) {
+    if (e.message === 'Требуется вход') {
+      pendingPathAfterAuth = location.pathname;
+      me = null; renderUserbox();
+      return renderAuth('', 'link');
+    }
     setPage(`<div class="card" style="max-width:420px;margin:60px auto;text-align:center;">
       <h2 class="section">Ссылка недействительна</h2>
       <p class="section-sub" style="margin-top:8px;">${esc(e.message)}</p></div>`);
@@ -1256,6 +1617,11 @@ async function openSpectate(code) {
       } catch (e) {}
     }, 2000);
   } catch (e) {
+    if (e.message === 'Требуется вход') {
+      pendingPathAfterAuth = location.pathname;
+      me = null; renderUserbox();
+      return renderAuth('', 'link');
+    }
     setPage(`<div class="card" style="max-width:420px;margin:60px auto;text-align:center;">
       <h2 class="section">Матч не найден</h2>
       <p class="section-sub" style="margin-top:8px;">${esc(e.message)}</p></div>`);
@@ -1614,7 +1980,17 @@ async function doSide(side) {
 
 /* ------------------------------------------------ Роутинг + старт */
 (async () => {
-  const [meResp, cfg] = await Promise.all([api('/api/me'), api('/api/config')]);
+  let meResp = { user: null };
+  let cfg = { googleClientId: null };
+
+  // На GitHub Pages нет Node API. Раньше из-за 404 на /api/me первый рендер падал,
+  // и экран оставался пустым до клика по логотипу. Теперь хотя бы показываем страницу входа.
+  try {
+    [meResp, cfg] = await Promise.all([api('/api/me'), api('/api/config')]);
+  } catch (e) {
+    console.warn('API недоступен при старте:', e.message);
+  }
+
   me = meResp.user ? meResp.user.username : null;
   myAvatar = meResp.user ? (meResp.user.avatar || 0) : 0;
   googleClientId = cfg.googleClientId;
@@ -1623,6 +1999,10 @@ async function doSide(side) {
   const path = location.pathname;
   const mVeto = path.match(/^\/veto\/([a-f0-9]{32})$/);
   const mWatch = path.match(/^\/watch\/([A-Za-z0-9]+)$/);
+  if ((mVeto || mWatch) && !me) {
+    pendingPathAfterAuth = path;
+    return renderAuth('', 'link');
+  }
   if (mVeto) return openCaptain(mVeto[1]);
   if (mWatch) return openSpectate(mWatch[1]);
   me ? renderDashboard() : renderAuth();
